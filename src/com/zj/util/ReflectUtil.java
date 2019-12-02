@@ -45,11 +45,16 @@ public class ReflectUtil {
         try {
             String fieldType = field.getGenericType().toString();
 
-            if("class java.lang.Integer".equals(fieldType)){
-                field.set(obj,Integer.parseInt(value));
+            if("class java.lang.Integer".equals(fieldType) || "int".equals(fieldType)){
+                Double dValue = Double.parseDouble(value);//处理excel读取数字，带".0"
+                field.set(obj,dValue.intValue());
             }
-            else if("class java.lang.Double".equals(fieldType)){
+            else if("class java.lang.Double".equals(fieldType) || "double".equals(fieldType) ){
                 field.set(obj,Double.parseDouble(value));
+            }
+            else if("class java.lang.Long".equals(fieldType) || "long".equals(fieldType) ){
+                Double dValue = Double.parseDouble(value);//处理excel读取数字，带".0"
+                field.set(obj,dValue.longValue());
             }
             else if("class java.lang.String".equals(fieldType)){
                 field.set(obj,value);
@@ -61,6 +66,25 @@ public class ReflectUtil {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 使用反射，给对象的某个属性赋值</P>
+     * 现只支持属性为String ，Interger，Double,Date类型的字段
+     * @param obj
+     * @param fieldName
+     * @param value
+     */
+    public static void setFileValue(Object obj, String  fieldName, String value){
+        try {
+            Field field = obj.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            setFileValue(obj,field,value);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     /**
      * 使用反射，给对象的属性赋值</P>
@@ -79,6 +103,24 @@ public class ReflectUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    /**
+     * 使用反射，获取对象的属性赋值</P>
+     * @param obj
+     * @param FileName
+     */
+    public static Object getFileValue(Object obj,String FileName){
+        try {
+            Field field = obj.getClass().getField(FileName);
+            field.setAccessible(true);
+            Object o = field.get(obj);
+            return o;
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void main(String[] args) {
